@@ -14,43 +14,30 @@ struct ListProfileItemComp: View {
     var imageName: ImageResource
     var name: String
     var email: String
-    @State private var isExpanding: Bool = false
-    //    @Binding var isExpanding: Bool
     //    @EnvironmentObject var router: Router
     
     var body: some View {
-        VStack{
-            HStack{
-                Image(imageName)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: imgSize, height: imgSize)
-                    .clipShape(Circle())
-                    .shadow(radius: 5, x: 0, y: 2)
-                
-                
-                if !isExpanding{
-                    VStack(alignment: .leading, spacing: 8){
-                        Text(name)
-                            .bold()
-                            .foregroundStyle(.primary)
-                        Text("\(email)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        
-                    }
-                    
-                    Spacer()
-                }
+        HStack(spacing: 15) {
+            Image(imageName)
+                .resizable()
+                .frame(width: 60, height: 60)
+                .clipShape(Circle())
+                .shadow(radius: 3, x: 0, y: 2)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(name)
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                Text(email)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
             }
+            
+            Spacer()
+            
         }
-        .padding(0)
-        .background(
-            Capsule()
-                .foregroundStyle(.thinMaterial)
-        )
-        .shadow(radius: 2, y: 2)
-        .compositingGroup()
+        .padding()
+        .background(RoundedRectangle(cornerRadius: 15).fill(.thinMaterial))
 //        .onTapGesture {
         
 //        }
@@ -61,6 +48,5 @@ struct ListProfileItemComp: View {
     ListProfileItemComp(imageName: .avatarEx,
                         name: "John Doe",
                         email: "johndoe@email.com",
-                        //                        isExpanding: .constant(false)
     )
 }

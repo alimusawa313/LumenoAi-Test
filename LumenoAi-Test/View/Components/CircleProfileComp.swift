@@ -13,8 +13,8 @@ struct CircleProfileComp: View {
     var imageName: ImageResource
     var name: String
     var email: String
-    @State private var isExpanding: Bool = false
-    //    @Binding var isExpanding: Bool
+    //    @State private var isExpanding: Bool = false
+    @Binding var isExpanding: Bool
     //    @EnvironmentObject var router: Router
     
     var body: some View {
@@ -66,6 +66,6 @@ struct CircleProfileComp: View {
     CircleProfileComp( imageName: .avatarEx,
                        name: "John Doe",
                        email: "johndoe@email.com",
-                       //                       isExpanding: .constant(false)
+                       isExpanding: .constant(false)
     )
 }

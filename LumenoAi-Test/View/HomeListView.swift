@@ -156,102 +156,104 @@ struct HomeListView: View {
     }
     
     var body: some View {
-        NavigationStack(path: $navigationPath) {
-            ZStack {
-                mainContentView
-                overlayViews
-            }
-            .onAppear {
-                if userViewModel.users.isEmpty && !userViewModel.isLoading {
-                    Task {
-                        await userViewModel.fetchUsers()
+        NavigationView{
+            NavigationStack(path: $navigationPath) {
+                ZStack {
+                    mainContentView
+                    overlayViews
+                }
+                .onAppear {
+                    if userViewModel.users.isEmpty && !userViewModel.isLoading {
+                        Task {
+                            await userViewModel.fetchUsers()
+                        }
+                    } else {
+                        
+                        honeycombViewModel.updateUsers(userViewModel.users)
                     }
-                } else {
+                }
+                .toolbar(content: {
                     
-                    honeycombViewModel.updateUsers(userViewModel.users)
+                    ToolbarItemGroup(placement: .topBarTrailing) {
+                        Button {
+                            Task {
+                                await userViewModel.refreshUsers()
+                            }
+                        } label: {
+                            Image(systemName: "arrow.clockwise")
+                        }
+                        .disabled(userViewModel.isLoading)
+                        
+                        Menu {
+                            Menu {
+                                Button {
+                                    withAnimation(.spring()) {
+                                        viewMode = .grid
+                                    }
+                                } label: {
+                                    Label("Grid", systemImage: viewMode == .grid ? "checkmark" : "square.grid.2x2")
+                                }
+                                
+                                Button {
+                                    withAnimation(.spring()) {
+                                        viewMode = .list
+                                    }
+                                } label: {
+                                    Label("List", systemImage: viewMode == .list ? "checkmark" : "list.bullet")
+                                }
+                            } label: {
+                                Label("View as", systemImage: "eye")
+                            }
+                            
+                            // MARK: - Sort Menu (only when in list mode)
+                            //                      if viewMode == .list {
+                            //                          Menu {
+                            //                              Button {
+                            //                                  print("Sort by Name")
+                            //                              } label: {
+                            //                                  Label("Name", systemImage: "person.text.rectangle")
+                            //                              }
+                            //                              
+                            //                              Button {
+                            //                                  print("Sort by Last Active")
+                            //                              } label: {
+                            //                                  Label("Newest", systemImage: "clock.arrow.circlepath")
+                            //                              }
+                            //                          } label: {
+                            //                              Label("Sort by", systemImage: "arrow.up.arrow.down")
+                            //                          }
+                            //                      }
+                        } label: {
+                            Image(systemName: "line.horizontal.3.decrease")
+                        }
+                    }
+                    
+                    //              ToolbarItem(placement: .topBarTrailing) {
+                    //                  Image(.avatarEx)
+                    //                      .resizable()
+                    //                      .frame(width: 35, height: 35)
+                    //                      .clipShape(Circle())
+                    //                      .matchedTransitionSource(id: "profileAvatar", in: animation)
+                    //                      .onTapGesture {
+                    //                          navigationPath.append(.profile)
+                    //                      }
+                    //              
+                    //            }
+                    
+                })
+                .background(.tertiary.opacity(0.5))
+                .navigationTitle("Discover")
+                .navigationBarTitleDisplayMode(viewMode == .list ? .large : .inline)
+                .navigationDestination(for: NavigationDestination.self) { destination in
+                    switch destination {
+                    case .profile:
+                        ProfileView()
+                            .navigationTransition(.zoom(sourceID: "profileAvatar", in: animation))
+                    case .userProfile(let user):
+                        ProfileView(user: user, isCurrentUser: false)
+                    }
                 }
             }
-        .toolbar(content: {
-            
-            ToolbarItemGroup(placement: .topBarTrailing) {
-                  Button {
-                      Task {
-                          await userViewModel.refreshUsers()
-                      }
-                  } label: {
-                      Image(systemName: "arrow.clockwise")
-                  }
-                  .disabled(userViewModel.isLoading)
-                  
-                  Menu {
-                      Menu {
-                          Button {
-                              withAnimation(.spring()) {
-                                  viewMode = .grid
-                              }
-                          } label: {
-                              Label("Grid", systemImage: viewMode == .grid ? "checkmark" : "square.grid.2x2")
-                          }
-                          
-                          Button {
-                              withAnimation(.spring()) {
-                                  viewMode = .list
-                              }
-                          } label: {
-                              Label("List", systemImage: viewMode == .list ? "checkmark" : "list.bullet")
-                          }
-                      } label: {
-                          Label("View as", systemImage: "eye")
-                      }
-                      
-                      // MARK: - Sort Menu (only when in list mode)
-//                      if viewMode == .list {
-//                          Menu {
-//                              Button {
-//                                  print("Sort by Name")
-//                              } label: {
-//                                  Label("Name", systemImage: "person.text.rectangle")
-//                              }
-//                              
-//                              Button {
-//                                  print("Sort by Last Active")
-//                              } label: {
-//                                  Label("Newest", systemImage: "clock.arrow.circlepath")
-//                              }
-//                          } label: {
-//                              Label("Sort by", systemImage: "arrow.up.arrow.down")
-//                          }
-//                      }
-                  } label: {
-                      Image(systemName: "line.horizontal.3.decrease")
-                  }
-              }
-              
-//              ToolbarItem(placement: .topBarTrailing) {
-//                  Image(.avatarEx)
-//                      .resizable()
-//                      .frame(width: 35, height: 35)
-//                      .clipShape(Circle())
-//                      .matchedTransitionSource(id: "profileAvatar", in: animation)
-//                      .onTapGesture {
-//                          navigationPath.append(.profile)
-//                      }
-//              
-//            }
-
-        })
-        .background(.tertiary.opacity(0.5))
-        .navigationTitle("Discover")
-        .navigationBarTitleDisplayMode(viewMode == .list ? .large : .inline)
-        .navigationDestination(for: NavigationDestination.self) { destination in
-            switch destination {
-            case .profile:
-                ProfileView()
-                    .navigationTransition(.zoom(sourceID: "profileAvatar", in: animation))
-            case .userProfile(let user):
-                ProfileView(user: user, isCurrentUser: false)
-            }
-        }
         }
     }
 }

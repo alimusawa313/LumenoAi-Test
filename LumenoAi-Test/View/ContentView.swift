@@ -51,7 +51,6 @@ struct MainAppView: View {
                 }
                 .tag(1)
         }
-        .navigationBarHidden(true)
         .onAppear {
             selectedTab = 0
             

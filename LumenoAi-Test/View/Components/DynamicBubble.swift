@@ -45,6 +45,7 @@ struct DynamicBubble: View {
     var body: some View {
         CircleProfileComp(
             imageName: position.imageName,
+            imageURL: position.imageURL,
             name: position.name,
             email: position.username,
             isExpanding: $isExpanded

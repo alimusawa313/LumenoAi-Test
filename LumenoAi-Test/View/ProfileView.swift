@@ -9,6 +9,7 @@ import SwiftUI
 import MapKit
 
 struct ProfileView: View {
+    @Environment(\.dismiss) private var dismiss
     @State private var selectedTab = "info"
     @State private var scrollOffset: CGFloat = 0
     @State private var isScrolled: Bool = false
@@ -312,47 +313,63 @@ struct ProfileView: View {
                 )
             }
             
-            // Compact header when scrolled
-            VStack {
-                HStack {
-                    Image(.avatarEx)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: isScrolled ? 35 : 0, height: isScrolled ? 35 : 0)
-                        .clipShape(Circle())
-                        .opacity(isScrolled ? 1 : 0)
-                        .animation(.easeInOut(duration: 0.3), value: isScrolled)
+            // Custom navigation bar with back button
+            VStack(spacing: 0) {
+                HStack(spacing: 12) {
+                    // Custom back button
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundStyle(.primary)
+                            .frame(width: 30, height: 40)
+                    }.buttonStyle(.glass)
                     
-                    Text("Jennie Nichols")
-                        .font(.headline)
-                        .bold()
-                        .opacity(isScrolled ? 1 : 0)
-                        .animation(.easeInOut(duration: 0.3), value: isScrolled)
+                    // Compact header content when scrolled
+                    if isScrolled {
+                        Image(.avatarEx)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 35, height: 35)
+                            .clipShape(Circle())
+                        
+                        Text("Jennie Nichols")
+                            .font(.headline)
+                            .bold()
+                    }
                     
                     Spacer()
                     
-                    Button(action: {
-                        // Action for follow/edit
-                    }) {
-                        Text(isCurrentUser ? "Edit" : "Follow")
-                            .font(.caption)
-                            .bold()
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 8)
-                            .background(isCurrentUser ? Color.gray : Color.blue)
-                            .clipShape(Capsule())
+                    // Follow/Edit button when scrolled
+                    if isScrolled {
+                        Button(action: {
+                            // Action for follow/edit
+                        }) {
+                            Text(isCurrentUser ? "Edit" : "Follow")
+                                .font(.caption)
+                                .bold()
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 8)
+                                .background(isCurrentUser ? Color.gray : Color.blue)
+                                .clipShape(Capsule())
+                        }
                     }
-                    .opacity(isScrolled ? 1 : 0)
-                    .animation(.easeInOut(duration: 0.3), value: isScrolled)
                 }
-                .padding()
-                .background(Color(.systemBackground).opacity(isScrolled ? 1 : 0))
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+                .padding(.bottom, 8)
+                .background(
+                    Color(.systemBackground)
+                        .opacity(isScrolled ? 1 : 0)
+                )
                 .animation(.easeInOut(duration: 0.3), value: isScrolled)
                 
                 Spacer()
             }
         }
+        .navigationBarHidden(true)
     }
 }
 

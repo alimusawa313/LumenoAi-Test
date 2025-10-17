@@ -11,6 +11,7 @@ struct CircleProfileComp: View {
     
     var imgSize: CGFloat = 80
     var imageName: ImageResource
+    var imageURL: String?
     var name: String
     var email: String
     //    @State private var isExpanding: Bool = false
@@ -18,21 +19,35 @@ struct CircleProfileComp: View {
     //    @EnvironmentObject var router: Router
     
     var body: some View {
-        VStack{
-            Image(imageName)
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(width: imgSize, height: imgSize)
-                .clipShape(Circle())
+        VStack(alignment: .center){
+            if let imageURL = imageURL {
+                AsyncProfileImage(
+                    imageURL: imageURL,
+                    size: imgSize,
+                    fallbackImage: imageName
+                )
                 .shadow(radius: 5, x: 0, y: 2)
                 .onTapGesture {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                         isExpanding.toggle()
                     }
                 }
+            } else {
+                Image(imageName)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: imgSize, height: imgSize)
+                    .clipShape(Circle())
+                    .shadow(radius: 5, x: 0, y: 2)
+                    .onTapGesture {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                            isExpanding.toggle()
+                        }
+                    }
+            }
             
             if isExpanding{
-                VStack(alignment: .leading, spacing: 8){
+                VStack(alignment: .center, spacing: 8){
                     Text(name)
                         .bold()
                         .foregroundStyle(.primary)
@@ -63,9 +78,11 @@ struct CircleProfileComp: View {
 }
 
 #Preview {
-    CircleProfileComp( imageName: .avatarEx,
-                       name: "John Doe",
-                       email: "johndoe@email.com",
-                       isExpanding: .constant(false)
+    CircleProfileComp(
+        imageName: .avatarEx,
+        imageURL: "https://randomuser.me/api/portraits/thumb/men/75.jpg",
+        name: "John Doe",
+        email: "johndoe@email.com",
+        isExpanding: .constant(true)
     )
 }

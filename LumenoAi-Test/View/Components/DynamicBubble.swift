@@ -13,18 +13,21 @@ struct DynamicBubble: View {
     let viewportSize: CGSize
     @Binding var expandedBubbleId: UUID?
     let allPositions: [HoneycombPosition]
+    var onViewProfile: ((User) -> Void)?
     
     @State private var isExpanded: Bool = false
+    @State private var isVisible: Bool = false
     
     // Pre-calculate constants that don't change
     private let distanceFromCanvasCenter: CGFloat
     private let normalizedDirection: CGSize // Unit vector from canvas center
     
-    init(position: HoneycombPosition, viewportSize: CGSize, expandedBubbleId: Binding<UUID?>, allPositions: [HoneycombPosition]) {
+    init(position: HoneycombPosition, viewportSize: CGSize, expandedBubbleId: Binding<UUID?>, allPositions: [HoneycombPosition], onViewProfile: ((User) -> Void)? = nil) {
         self.position = position
         self.viewportSize = viewportSize
         self._expandedBubbleId = expandedBubbleId
         self.allPositions = allPositions
+        self.onViewProfile = onViewProfile
         
         // Pre-calculate distance from canvas center (only once)
         let dist = sqrt(position.offset.width * position.offset.width +
@@ -48,11 +51,27 @@ struct DynamicBubble: View {
             imageURL: position.imageURL,
             name: position.name,
             email: position.username,
-            isExpanding: $isExpanded
+            isExpanding: $isExpanded,
+            user: position.user,
+            onViewProfile: {
+                if let user = position.user {
+                    onViewProfile?(user)
+                }
+            }
         )
         .frame(minWidth: 80, minHeight: 80)
-        .frame(width: isExpanded ? nil : 80, height: isExpanded ? nil : 80, alignment: .leading)
+        .fixedSize(horizontal: isExpanded ? false : true, vertical: isExpanded ? false : true)
         .zIndex(isExpanded ? 1000 : 0)
+        .opacity(isVisible ? 1.0 : 0.0)
+        .scaleEffect(isVisible ? 1.0 : 0.1)
+        .onAppear {
+            // Calculate delay based on ring number for staggered animation
+            let delay = Double(position.ring) * 0.15 // 0.15 seconds between rings
+            
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.8).delay(delay)) {
+                isVisible = true
+            }
+        }
         .onChange(of: isExpanded) { oldValue, newValue in
             if newValue {
                 expandedBubbleId = position.id
@@ -91,7 +110,9 @@ struct DynamicBubble: View {
             
             // Calculate push-away effect only if a bubble is expanded
             var pushOffset: CGSize = .zero
-            if let expandedId = expandedBubbleId,
+            // Snapshot the expanded id on the main actor to avoid capturing a main-actor isolated binding
+            let currentExpandedId: UUID? = MainActor.assumeIsolated { expandedBubbleId }
+            if let expandedId = currentExpandedId,
                expandedId != position.id,
                let expandedPosition = allPositions.first(where: { $0.id == expandedId }) {
                 

@@ -16,10 +16,12 @@ struct CircleProfileComp: View {
     var email: String
     //    @State private var isExpanding: Bool = false
     @Binding var isExpanding: Bool
+    var user: User?
+    var onViewProfile: (() -> Void)?
     //    @EnvironmentObject var router: Router
     
     var body: some View {
-        VStack(alignment: .center){
+        VStack(alignment: .center, spacing: isExpanding ? 8 : 0){
             if let imageURL = imageURL {
                 AsyncProfileImage(
                     imageURL: imageURL,
@@ -51,22 +53,28 @@ struct CircleProfileComp: View {
                     Text(name)
                         .bold()
                         .foregroundStyle(.primary)
+                        .fixedSize(horizontal: false, vertical: true)
                     Text("\(email)")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                     
                     Button("View Profile"){
+                        onViewProfile?()
                     }
                     .buttonStyle(.glassProminent)
                     
                 }
+                .frame(minWidth: 120)
                 .padding(.trailing, 5)
-                .transition(.asymmetric(
-                    insertion: .scale(scale: 0.8).combined(with: .opacity),
-                    removal: .scale(scale: 0.8).combined(with: .opacity)
-                ))
+                .transition(.opacity)
+//                .transition(.asymmetric(
+//                    insertion: .scale(scale: 0.8).combined(with: .opacity),
+//                    removal: .scale(scale: 0.8).combined(with: .opacity)
+//                ))
             }
         }
+        .frame(minWidth: imgSize, minHeight: imgSize)
         .padding(isExpanding ? 15 : 0)
         .background(
             RoundedRectangle(cornerRadius: isExpanding ? 20 : 200)
@@ -83,6 +91,8 @@ struct CircleProfileComp: View {
         imageURL: "https://randomuser.me/api/portraits/thumb/men/75.jpg",
         name: "John Doe",
         email: "johndoe@email.com",
-        isExpanding: .constant(true)
+        isExpanding: .constant(true),
+        user: nil,
+        onViewProfile: nil
     )
 }

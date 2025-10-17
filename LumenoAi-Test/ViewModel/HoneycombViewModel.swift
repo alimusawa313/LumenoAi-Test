@@ -34,11 +34,12 @@ class HoneycombViewModel: ObservableObject {
             positions.append(HoneycombPosition(
                 offset: CGSize(width: 0, height: 0),
                 imageName: .avatarEx,
-                imageURL: user.picture.thumbnail,
+                imageURL: user.picture.large,
                 name: user.name.fullName,
                 username: user.login.username,
                 backgroundColor: user.honeycombPosition.backgroundColor,
-                user: user
+                user: user,
+                ring: 0
             ))
             userIndex += 1
         }
@@ -53,11 +54,12 @@ class HoneycombViewModel: ObservableObject {
                 positions.append(HoneycombPosition(
                     offset: CGSize(width: x, height: y),
                     imageName: .avatarEx,
-                    imageURL: user.picture.thumbnail,
+                    imageURL: user.picture.large,
                     name: user.name.fullName,
                     username: user.login.username,
                     backgroundColor: user.honeycombPosition.backgroundColor,
-                    user: user
+                    user: user,
+                    ring: 1
                 ))
                 userIndex += 1
             }
@@ -73,11 +75,12 @@ class HoneycombViewModel: ObservableObject {
                 positions.append(HoneycombPosition(
                     offset: CGSize(width: x, height: y),
                     imageName: .avatarEx,
-                    imageURL: user.picture.thumbnail,
+                    imageURL: user.picture.large,
                     name: user.name.fullName,
                     username: user.login.username,
                     backgroundColor: user.honeycombPosition.backgroundColor,
-                    user: user
+                    user: user,
+                    ring: 2
                 ))
                 userIndex += 1
             }
@@ -93,11 +96,12 @@ class HoneycombViewModel: ObservableObject {
                 positions.append(HoneycombPosition(
                     offset: CGSize(width: x, height: y),
                     imageName: .avatarEx,
-                    imageURL: user.picture.thumbnail,
+                    imageURL: user.picture.large,
                     name: user.name.fullName,
                     username: user.login.username,
                     backgroundColor: user.honeycombPosition.backgroundColor,
-                    user: user
+                    user: user,
+                    ring: 3
                 ))
                 userIndex += 1
             }
@@ -113,11 +117,12 @@ class HoneycombViewModel: ObservableObject {
                 positions.append(HoneycombPosition(
                     offset: CGSize(width: x, height: y),
                     imageName: .avatarEx,
-                    imageURL: user.picture.thumbnail,
+                    imageURL: user.picture.large,
                     name: user.name.fullName,
                     username: user.login.username,
                     backgroundColor: user.honeycombPosition.backgroundColor,
-                    user: user
+                    user: user,
+                    ring: 4
                 ))
                 userIndex += 1
             }

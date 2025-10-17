@@ -15,6 +15,8 @@ struct ListProfileItemComp: View {
     var imageURL: String?
     var name: String
     var email: String
+    var user: User?
+    var onViewProfile: (() -> Void)?
     //    @EnvironmentObject var router: Router
     
     var body: some View {
@@ -48,9 +50,9 @@ struct ListProfileItemComp: View {
         }
         .padding()
         .background(RoundedRectangle(cornerRadius: 15).fill(.thinMaterial))
-//        .onTapGesture {
-        
-//        }
+        .onTapGesture {
+            onViewProfile?()
+        }
     }
 }
 
@@ -59,6 +61,8 @@ struct ListProfileItemComp: View {
         imageName: .avatarEx,
         imageURL: "https://randomuser.me/api/portraits/thumb/men/75.jpg",
         name: "John Doe",
-        email: "johndoe@email.com"
+        email: "johndoe@email.com",
+        user: nil,
+        onViewProfile: nil
     )
 }

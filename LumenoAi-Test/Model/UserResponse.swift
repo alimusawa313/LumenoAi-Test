@@ -14,7 +14,7 @@ struct UserResponse: Codable {
 }
 
 // MARK: - User
-struct User: Codable, Equatable {
+struct User: Codable, Equatable, Hashable {
     let gender: String
     let name: Name
     let location: Location
@@ -30,7 +30,7 @@ struct User: Codable, Equatable {
 }
 
 // MARK: - Name
-struct Name: Codable, Equatable {
+struct Name: Codable, Equatable, Hashable {
     let title: String
     let first: String
     let last: String
@@ -45,7 +45,7 @@ struct Name: Codable, Equatable {
 }
 
 // MARK: - Location
-struct Location: Codable, Equatable {
+struct Location: Codable, Equatable, Hashable {
     let street: Street
     let city: String
     let state: String
@@ -83,13 +83,13 @@ struct Location: Codable, Equatable {
 }
 
 // MARK: - Street
-struct Street: Codable, Equatable {
+struct Street: Codable, Equatable, Hashable {
     let number: Int
     let name: String
 }
 
 // MARK: - Coordinates
-struct Coordinates: Codable, Equatable {
+struct Coordinates: Codable, Equatable, Hashable {
     let latitude: String
     let longitude: String
     
@@ -103,13 +103,13 @@ struct Coordinates: Codable, Equatable {
 }
 
 // MARK: - Timezone
-struct Timezone: Codable, Equatable {
+struct Timezone: Codable, Equatable, Hashable {
     let offset: String
     let description: String
 }
 
 // MARK: - Login
-struct Login: Codable, Equatable {
+struct Login: Codable, Equatable, Hashable {
     let uuid: String
     let username: String
     let password: String
@@ -120,7 +120,7 @@ struct Login: Codable, Equatable {
 }
 
 // MARK: - DateInfo
-struct DateInfo: Codable, Equatable {
+struct DateInfo: Codable, Equatable, Hashable {
     let date: String
     let age: Int
     
@@ -139,13 +139,13 @@ struct DateInfo: Codable, Equatable {
 }
 
 // MARK: - ID
-struct ID: Codable, Equatable {
+struct ID: Codable, Equatable, Hashable {
     let name: String
     let value: String?
 }
 
 // MARK: - Picture
-struct Picture: Codable, Equatable {
+struct Picture: Codable, Equatable, Hashable {
     let large: String
     let medium: String
     let thumbnail: String

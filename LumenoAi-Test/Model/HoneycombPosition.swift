@@ -16,8 +16,9 @@ struct HoneycombPosition: Identifiable {
     let username: String
     let backgroundColor: Color
     let user: User?
+    let ring: Int 
     
-    init(offset: CGSize, imageName: ImageResource, imageURL: String? = nil, name: String, username: String, backgroundColor: Color, user: User? = nil) {
+    init(offset: CGSize, imageName: ImageResource, imageURL: String? = nil, name: String, username: String, backgroundColor: Color, user: User? = nil, ring: Int = 0) {
         self.offset = offset
         self.imageName = imageName
         self.imageURL = imageURL
@@ -25,5 +26,6 @@ struct HoneycombPosition: Identifiable {
         self.username = username
         self.backgroundColor = backgroundColor
         self.user = user
+        self.ring = ring
     }
 }

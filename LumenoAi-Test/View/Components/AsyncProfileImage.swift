@@ -19,14 +19,29 @@ struct AsyncProfileImage: View {
     }
     
     var body: some View {
-        AsyncImage(url: URL(string: imageURL)) { image in
-            image
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-        } placeholder: {
-            Image(fallbackImage)
-                .resizable()
-                .aspectRatio(contentMode: .fill)
+        AsyncImage(url: URL(string: imageURL)) { phase in
+            switch phase {
+            case .empty:
+                Image(fallbackImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: size, height: size)
+            case .success(let image):
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: size, height: size)
+            case .failure:
+                Image(fallbackImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: size, height: size)
+            @unknown default:
+                Image(fallbackImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: size, height: size)
+            }
         }
         .frame(width: size, height: size)
         .clipShape(Circle())
@@ -34,6 +49,30 @@ struct AsyncProfileImage: View {
             Circle()
                 .stroke(Color.white, lineWidth: 2)
         )
+        .task(id: imageURL) {
+            // Preload image in background for better performance
+            await preloadImage()
+        }
+    }
+    
+    private func preloadImage() async {
+        guard let url = URL(string: imageURL) else { return }
+        
+        await Task.detached(priority: .utility) {
+            do {
+                // Use optimized URLSession configuration for image preloading
+                let config = URLSessionConfiguration.default
+                config.timeoutIntervalForRequest = 5.0
+                config.timeoutIntervalForResource = 15.0
+                config.waitsForConnectivity = false
+                
+                let session = URLSession(configuration: config)
+                let (_, _) = try await session.data(from: url)
+                // Image is now cached by URLSession
+            } catch {
+                // Silently fail - AsyncImage will handle the error
+            }
+        }.value
     }
 }
 

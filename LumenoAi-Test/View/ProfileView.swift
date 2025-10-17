@@ -6,305 +6,101 @@
 //
 
 import SwiftUI
-import MapKit
 
 struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var authManager: AuthManager
     @State private var selectedTab = "info"
     @State private var scrollOffset: CGFloat = 0
     @State private var isScrolled: Bool = false
+    @State private var showFullScreenImage: Bool = false
+    @State private var showingLogoutAlert = false
     
-    var isCurrentUser: Bool = false // Set to true for current user's profile
+    let profileUser: User?
+    let isCurrentUser: Bool
+    
+    init(user: User? = nil, isCurrentUser: Bool = true) {
+        self.profileUser = user
+        self.isCurrentUser = isCurrentUser
+    }
+    
+    var user: User? {
+        profileUser ?? authManager.currentUser
+    }
     
     private let scrollThreshold: CGFloat = 80
     
+    private var displayImage: ImageResource {
+        .avatarEx
+    }
+    
+    private var displayImageURL: String? {
+        user?.picture.large
+    }
+    
     var body: some View {
         ZStack {
-            VStack {
-                ZStack {
-                    Image(.avatarEx)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(height: isScrolled ? 0 : max(300 - scrollOffset, 0))
-                        .opacity(isScrolled ? 0 : 1)
-                        .ignoresSafeArea()
-                        .animation(.easeInOut(duration: 0.3), value: isScrolled)
-                        .animation(.easeInOut(duration: 0.3), value: scrollOffset)
-                    
-                    VStack {
-                        Spacer()
-                        Rectangle()
-                            .frame(height: isScrolled ? 0 : 150)
-                            .opacity(isScrolled ? 0 : 1)
-                            .foregroundStyle(LinearGradient(colors: [.clear, Color(.systemBackground), Color(.systemBackground)], startPoint: .top, endPoint: .bottom))
-                            .allowsHitTesting(false)
-                            .animation(.easeInOut(duration: 0.8), value: isScrolled)
-                            .animation(.easeInOut(duration: 0.3), value: scrollOffset)
-                            .padding(.bottom, -10)
-                    }
+            ProfileHeaderView(
+                user: user,
+                isCurrentUser: isCurrentUser,
+                isScrolled: isScrolled,
+                scrollOffset: scrollOffset,
+                onImageTap: {
+                    showFullScreenImage = true
                 }
-                .frame(height: isScrolled ? 0 : max(300 - scrollOffset, 0))
-                .animation(.easeInOut(duration: 0.3), value: isScrolled)
-                .animation(.easeInOut(duration: 0.3), value: scrollOffset)
-                
-                Spacer()
-            }
+            )
             
             ScrollView {
-                VStack{
-                    Rectangle()
-                        .frame(height: 200)
-                        .opacity(0)
-                    HStack{
-                        Text("Jennie Nichols")
-                            .font(.title3)
-                            .bold()
-                            .padding(.bottom, 10)
-                        
-                        Spacer()
-                        
-                        Button(action: {
-                            // Action for follow/edit
-                        }) {
-                            Text(isCurrentUser ? "Edit Profile" : "Follow")
-                                .font(.subheadline)
-                                .bold()
-                                .foregroundStyle(.white)
-                                .padding(.horizontal, 30)
-                                .padding(.vertical, 10)
-                                .background(isCurrentUser ? Color.gray : Color.blue)
-                                .clipShape(Capsule())
+                VStack(spacing: 0) {
+                    ProfileNameSection(
+                        user: user,
+                        isCurrentUser: isCurrentUser,
+                        isScrolled: isScrolled
+                    )
+                    
+                    ProfileStatsView()
+                    
+                    if isCurrentUser {
+                        VStack(spacing: 12) {
+                            Button("Generate New Random User") {
+                                Task {
+                                    await authManager.loginWithRandomUser()
+                                }
+                            }
+                            .buttonSizing(.flexible)
+                            .buttonStyle(.glassProminent)
+                            
+                            Button("Logout") {
+                                showingLogoutAlert = true
+                            }
+                            .buttonSizing(.flexible)
+                            .buttonStyle(.glass)
+                            .foregroundColor(.red)
                         }
-                        .opacity(isScrolled ? 0 : 1)
-                        .animation(.easeInOut(duration: 0.3), value: isScrolled)
-                        .padding(.bottom, 10)
+                        .padding(.bottom)
                     }
-            
-            HStack{
-                VStack{
-                    Text("Followers")
-                        .foregroundStyle(.secondary)
-                        .font(.caption)
-                    Text("123")
-                        .bold()
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(RoundedRectangle(cornerRadius: 12).foregroundStyle(.thinMaterial))
-                VStack{
-                    Text("Followers")
-                        .foregroundStyle(.secondary)
-                        .font(.caption)
-                    Text("123")
-                        .bold()
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(RoundedRectangle(cornerRadius: 12).foregroundStyle(.thinMaterial))
-                
-            }
-            .padding(.vertical)
-            
-            Picker("Select Tab", selection: $selectedTab) {
-                Text("Info").tag("info")
-                Text("Location").tag("location")
-            }
-            .pickerStyle(.segmented)
-            
-            if selectedTab == "info" {
-                VStack{
-                    VStack(alignment: .leading){
-                        Text("name")
-                            .foregroundStyle(.secondary)
-                            .font(.caption)
-                        
-                        Text("Miss Jennie Nichols")
-                            .bold()
-                        HStack{Spacer()}
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 20).foregroundStyle(.thinMaterial))
                     
-                    VStack(alignment: .leading){
-                        Text("username")
-                            .foregroundStyle(.secondary)
-                            .font(.caption)
-                        
-                        Text("yellowpeacock117")
-                            .bold()
-                        HStack{Spacer()}
+                    Picker("Select Tab", selection: $selectedTab) {
+                        Text("Info").tag("info")
+                        Text("Location").tag("location")
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 20).foregroundStyle(.thinMaterial))
+                    .pickerStyle(.segmented)
                     
-                    VStack(alignment: .leading){
-                        Text("email")
-                            .foregroundStyle(.secondary)
-                            .font(.caption)
-                        
-                        Text("email@email.com")
-                            .bold()
-                        HStack{Spacer()}
+                    if selectedTab == "info" {
+                        ProfileInfoView(user: user)
+                    } else {
+                        ProfileLocationView(user: user)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 20).foregroundStyle(.thinMaterial))
-                    
-                    VStack(alignment: .leading){
-                        Text("gender")
-                            .foregroundStyle(.secondary)
-                            .font(.caption)
-                        
-                        Text("Male")
-                            .bold()
-                        HStack{Spacer()}
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 20).foregroundStyle(.thinMaterial))
-                    
-                    VStack(alignment: .leading){
-                        Text("phone")
-                            .foregroundStyle(.secondary)
-                            .font(.caption)
-                        
-                        Text("+1 (555) 123-4567")
-                            .bold()
-                        HStack{Spacer()}
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 20).foregroundStyle(.thinMaterial))
-                    
-                    VStack(alignment: .leading){
-                        Text("cell")
-                            .foregroundStyle(.secondary)
-                            .font(.caption)
-                        
-                        Text("+1 (555) 987-6543")
-                            .bold()
-                        HStack{Spacer()}
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 20).foregroundStyle(.thinMaterial))
-                }
-                .padding(.top)
-            } else {
-                VStack {
-                    Map {
-                        Marker("Location", coordinate: CLLocationCoordinate2D(latitude: -69.8246, longitude: 134.8719))
-                    }
-                    .frame(height: 250)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .padding(.bottom)
-                    
-                    VStack(alignment: .leading){
-                        Text("street")
-                            .foregroundStyle(.secondary)
-                            .font(.caption)
-                        
-                        Text("8929 Valwood Pkwy")
-                            .bold()
-                        HStack{Spacer()}
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 20).foregroundStyle(.thinMaterial))
-                    
-                    VStack(alignment: .leading){
-                        Text("city")
-                            .foregroundStyle(.secondary)
-                            .font(.caption)
-                        
-                        Text("Billings")
-                            .bold()
-                        HStack{Spacer()}
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 20).foregroundStyle(.thinMaterial))
-                    
-                    VStack(alignment: .leading){
-                        Text("state")
-                            .foregroundStyle(.secondary)
-                            .font(.caption)
-                        
-                        Text("Michigan")
-                            .bold()
-                        HStack{Spacer()}
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 20).foregroundStyle(.thinMaterial))
-                    
-                    VStack(alignment: .leading){
-                        Text("country")
-                            .foregroundStyle(.secondary)
-                            .font(.caption)
-                        
-                        Text("United States")
-                            .bold()
-                        HStack{Spacer()}
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 20).foregroundStyle(.thinMaterial))
-                    
-                    VStack(alignment: .leading){
-                        Text("postcode")
-                            .foregroundStyle(.secondary)
-                            .font(.caption)
-                        
-                        Text("63104")
-                            .bold()
-                        HStack{Spacer()}
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 20).foregroundStyle(.thinMaterial))
-                    
-                    VStack(alignment: .leading){
-                        Text("coordinates")
-                            .foregroundStyle(.secondary)
-                            .font(.caption)
-                        
-                        Text("Latitude: -69.8246, Longitude: 134.8719")
-                            .bold()
-                        HStack{Spacer()}
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 20).foregroundStyle(.thinMaterial))
-                    
-                    VStack(alignment: .leading){
-                        Text("timezone")
-                            .foregroundStyle(.secondary)
-                            .font(.caption)
-                        
-                        Text("+9:30 (Adelaide, Darwin)")
-                            .bold()
-                        HStack{Spacer()}
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 20).foregroundStyle(.thinMaterial))
-                }
-                .padding(.top)
-            }
-            
-            Spacer()
                 }
                 .padding(.horizontal)
+                .padding(.bottom, 20)
                 .background(
                     GeometryReader { geometry in
                         Color.clear
                             .onAppear {
                                 scrollOffset = 0
                             }
-                            .onChange(of: geometry.frame(in: .global).minY) { newValue in
+                            .onChange(of: geometry.frame(in: .global).minY) { oldValue, newValue in
                                 let offset = max(0, -newValue)
                                 scrollOffset = offset
                                 isScrolled = offset > scrollThreshold
@@ -313,70 +109,43 @@ struct ProfileView: View {
                 )
             }
             
-            // Custom navigation bar with back button
-            VStack(spacing: 0) {
-                HStack(spacing: 12) {
-                    // Custom back button
-                    Button(action: {
+            ProfileNavigationView(
+                user: user,
+                isCurrentUser: isCurrentUser,
+                isScrolled: isScrolled,
+                onBackTap: {
+                    if !isCurrentUser {
                         dismiss()
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(.primary)
-                            .frame(width: 30, height: 40)
-                    }.buttonStyle(.glass)
-                    
-                    // Compact header content when scrolled
-                    if isScrolled {
-                        Image(.avatarEx)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 35, height: 35)
-                            .clipShape(Circle())
-                        
-                        Text("Jennie Nichols")
-                            .font(.headline)
-                            .bold()
                     }
-                    
-                    Spacer()
-                    
-                    // Follow/Edit button when scrolled
-                    if isScrolled {
-                        Button(action: {
-                            // Action for follow/edit
-                        }) {
-                            Text(isCurrentUser ? "Edit" : "Follow")
-                                .font(.caption)
-                                .bold()
-                                .foregroundStyle(.white)
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 8)
-                                .background(isCurrentUser ? Color.gray : Color.blue)
-                                .clipShape(Capsule())
-                        }
-                    }
+                },
+                onImageTap: {
+                    showFullScreenImage = true
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 8)
-                .padding(.bottom, 8)
-                .background(
-                    Color(.systemBackground)
-                        .opacity(isScrolled ? 1 : 0)
-                )
-                .animation(.easeInOut(duration: 0.3), value: isScrolled)
-                
-                Spacer()
-            }
+            )
         }
         .navigationBarHidden(true)
+        .navigationBarBackButtonHidden()
+        .fullScreenCover(isPresented: $showFullScreenImage) {
+            ImageFullScreenView(
+                imageURL: displayImageURL,
+                fallbackImage: displayImage
+            )
+        }
+        .alert("Logout", isPresented: $showingLogoutAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Logout", role: .destructive) {
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: 100_000_000)
+                    authManager.logout()
+                }
+            }
+        } message: {
+            Text("Are you sure you want to logout?")
+        }
     }
 }
 
-#Preview("Not Current User") {
-    ProfileView(isCurrentUser: false)
-}
-
 #Preview("Current User") {
-    ProfileView(isCurrentUser: true)
+    ProfileView()
+        .environmentObject(AuthManager())
 }
